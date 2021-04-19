@@ -35,7 +35,7 @@ module Falcon
 			# @parameter status [Integer] The response status.
 			# @parameter headers [Protocol::HTTP::Headers] The response headers.
 			# @parameter body [Object] The `rack` response body.
-			def self.wrap(status, headers, body)
+			def self.wrap(status, headers, body, request = nil)
 				# In no circumstance do we want this header propagating out:
 				if length = headers.delete(CONTENT_LENGTH)
 					# We don't really trust the user to provide the right length to the transport.
@@ -44,6 +44,8 @@ module Falcon
 				
 				if body.is_a?(::Protocol::HTTP::Body::Readable)
 					return body
+				elsif body.respond_to?(:call)
+					return Async::HTTP::Body::Hijack.new(body, request&.body)
 				elsif status == 200 and body.respond_to?(:to_path)
 					# Don't mangle partial responsese (206)
 					return ::Protocol::HTTP::Body::File.open(body.to_path)

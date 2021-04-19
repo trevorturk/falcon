@@ -81,7 +81,7 @@ module Falcon
 						Async.logger.warn("Ignoring protocol-level headers: #{ignored.inspect}")
 					end
 					
-					body = Output.wrap(status, headers, body)
+					body = Output.wrap(status, headers, body, request)
 				end
 				
 				if request&.head?

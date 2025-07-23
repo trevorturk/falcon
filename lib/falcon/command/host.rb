@@ -16,19 +16,19 @@ module Falcon
 		# Manages a {Controller::Host} instance which is responsible for running applications in a production environment.
 		class Host < Samovar::Command
 			self.description = "Host the specified applications."
-			
+
 			# One or more paths to the configuration files.
 			# @name paths
 			# @attribute [Array(String)]
 			many :paths, "Service configuration paths.", default: ["falcon.rb"]
-			
+
 			include Paths
-			
+
 			# The container class to use.
 			def container_class
 				Async::Container.best_container_class
 			end
-			
+
 			# Prepare the environment and run the controller.
 			def call
 				Console.logger.info(self) do |buffer|
@@ -37,8 +37,8 @@ module Falcon
 					buffer.puts "- To terminate: Ctrl-C or kill #{Process.pid}"
 					buffer.puts "- To reload: kill -HUP #{Process.pid}"
 				end
-				
-				Async::Service::Controller.run(self.configuration, container_class: self.container_class)
+
+				Async::Service::Controller.run(self.configuration, container_class: self.container_class, graceful_stop: 30)
 			end
 		end
 	end
